@@ -3,6 +3,9 @@ uuid = "e12757ff-f4f6-49b6-ba6c-c7165673a2a0"
 authors = ["Mike Adendorff"]
 version = "1.0.0-DEV"
 
+[deps]
+MacroTools = "1914dd2f-81c6-5fcd-8719-6d5c9610ff09"
+
 [compat]
 julia = "1"
 
