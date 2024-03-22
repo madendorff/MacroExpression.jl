@@ -6,10 +6,9 @@ input expressions.
 function parseinput(targets=Vector{Type}, y...)
 	results = []
 	for input in y
-		if hasproperty(input, :head) && input.head == :block
+		if iscollection(input)
 			append!(results, parseinput(targets, input.args...))
 		else
-			println("JSKS", typeof(input))
 			capture!(results, input, targets...)
 		end
 	end
@@ -79,6 +78,16 @@ function capture(::Type{SymbolExpression{DataType}}, e::Any)
 
     typeof(eval(e)) == DataType && return SymbolExpression{DataType}(e, eval(e))
     return nothing
+
+end
+
+function iscollection(e::Any)
+
+	if hasproperty(e, :head) && e.head in (:block, :tuple)
+		return true
+	end
+
+	return false
 
 end
 

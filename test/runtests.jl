@@ -44,9 +44,27 @@ using Test
         l2 = MacroExpression.@testlit 13
         @test l2.value == 13
 
-        # collect array of floats
+        # collect array of strings
         arr = MacroExpression.@testlits "yw"
         @test arr == ["yw"]
+
+        # collect array of strings
+        arr = MacroExpression.@testlits "yw", "hj"
+        @test arr == ["yw", "hj"]
+
+        # collect mixed array in body
+        arr = MacroExpression.@testlits begin
+            34
+            "hj"
+        end
+        @test arr == [34, "hj"]     
+        
+        # collect mixed array
+        arr = MacroExpression.@testlits "kx", begin
+            34
+            "hj"
+        end
+        @test arr == ["kx", 34, "hj"]
 
         #Test assigning a new identifier to a literal
         MacroExpression.@testlitassign var1 62
