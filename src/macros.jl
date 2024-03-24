@@ -1,9 +1,28 @@
 const ALL_INPUTS = [
-    LiteralExpression{Int},
-    LiteralExpression{String},
-    LiteralExpression{Float64},
-    SymbolExpression{Function},
+    LiteralExpr{Int},
+    LiteralExpr{String},
+    LiteralExpr{Float64},
+    SymbolExpr{Function},
 ]
+
+function printinput(y...)
+	results = []
+	for input in y
+		if iscollection(input)
+			append!(results, showinput(input.args...))
+		else
+			print(input, targets...)
+		end
+	end
+	results
+end
+
+
+macro printinput(y...)
+	inputs = printinput(ALL_INPUTS, y...)
+	return inputs
+end
+
 
 macro parsemacro(y...)
 	inputs = parseinput(ALL_INPUTS, y...)
@@ -36,10 +55,20 @@ macro testlitassign(name, x)
     end
 end
 
+
 macro testarg(x)
-    args = parseinput([ArgExpression], x)
-    arg = args[1] |> exprarg |> esc
+    args = parseinput([ArgumentAssigment{Int}], x)
+    arg = args[1] |> argument |> esc
+    v = args[1] |> value
     return quote
-        $(arg) = 719
+        $arg = $v
+    end
+end
+
+macro testargs(x...)
+    args = parseinput([ArgumentAssigment{Int}], x...)
+    argassign = [assignment(a) |> esc for a in args]
+    return quote
+        $(argassign...)
     end
 end

@@ -30,56 +30,25 @@ function capture!(arr::Vector{Any}, expr::Any, T::Type...)
 	return arr
 end
 
-function capture(::Type{ArgExpression{T}}, e::Any) where T
+
+
+"""
+	capture(::T, expr)
+
+Parse an expression looking for a pattern associated with a specific logical expression type T. 
+Return an object or type T if the expression matches the pattern. Otherwise return nothing.
+
+example: capture(LiteralExpr{Int}, :(34)) 
+  >> LiteralExpr(34, Int)
+
+"""
+function capture(::Type{SymbolExpr{Enum}}, e::Any)
     
-    @capture(e, arg_::type_ = value_) && return ArgExpression(arg, type, value)
-    @capture(e, arg_ = value_) && return ArgExpression(arg, :Any, value)
-    @capture(e, arg_::type_) && return ArgExpression(arg, type, nothing)		
-
-    return nothing
-end
-
-function capture(::Type{LiteralExpression{Int}}, e::Any) where T
-
-	typeof(e) == Int && return LiteralExpression{Int}(e)
-	return nothing
-end
-
-function capture(::Type{LiteralExpression{Float64}}, e::Any) where T
-
-	typeof(e) == Float64 && return LiteralExpression{Float64}(e)
-	return nothing
-end
-
-function capture(::Type{LiteralExpression{String}}, e::Any) where T
-
-	typeof(e) == String && return LiteralExpression{String}(e)
-	return nothing
-end
-
-function capture(::Type{SymbolExpression{Function}}, e::Symbol)
-    
-    if isdefined(Main, e) && isa(getfield(Main, e), Function)
-        return SymbolExpression{Function}(e)
-    end
-    return nothing
-end
-
-capture(::Type{SymbolExpression{Function}}, e::Any) = nothing
-
-function capture(::Type{Pair}, e::Any)
-
-    @capture(e, x_ => y_) && return Pair(x, y)
+    typeof(eval(e)) <: Enum && return SymbolExpr{Enum}(e, typeof(eval(e)))
     return nothing
 
 end
 
-function capture(::Type{SymbolExpression{DataType}}, e::Any)
-
-    typeof(eval(e)) == DataType && return SymbolExpression{DataType}(e, eval(e))
-    return nothing
-
-end
 
 function iscollection(e::Any)
 
@@ -88,16 +57,4 @@ function iscollection(e::Any)
 	end
 
 	return false
-
-end
-
-"""
-Deconstruct an expression. Capture its metadata if the patterns 
-found in the expression's AST match a specific pattern.
-"""
-function capture(::Type{SymbolExpression{Enum}}, e::Any)
-    
-    typeof(eval(e)) <: Enum && return SymbolExpression{Enum}(e, typeof(eval(e)))
-    return nothing
-
 end

@@ -6,13 +6,16 @@ include("types.jl")
 include("capture.jl")
 include("macros.jl")
 
-export ArgExpression
+export ArgumentAssigment
 export capture
-export exprarg
-export exprkw
-export exprpair
+export @capture
+export argument
+export kwargument
+export pair
+export parseinput
+export value
 export @parsemacro
-export LiteralExpression
-export SymbolExpression
+export LiteralExpr
+export SymbolExpr
 
 end
