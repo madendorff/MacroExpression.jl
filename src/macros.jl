@@ -1,45 +1,29 @@
-const ALL_INPUTS = [
+const LITERALS = [
     LiteralExpr{Int},
     LiteralExpr{String},
     LiteralExpr{Float64},
+    LiteralExpr{Symbol},
     SymbolExpr{Function},
 ]
 
-function printinput(y...)
-	results = []
-	for input in y
-		if iscollection(input)
-			append!(results, showinput(input.args...))
-		else
-			print(input, targets...)
-		end
-	end
-	results
-end
-
-
-macro printinput(y...)
-	inputs = printinput(ALL_INPUTS, y...)
-	return inputs
-end
-
 
 macro parsemacro(y...)
-	inputs = parseinput(ALL_INPUTS, y...)
+	inputs = parseinput(LITERALS, y...)
 	return inputs
 end
 
 macro testlit(x)
-    args = parseinput( ALL_INPUTS, x)
-    arg = args[1] 
+    args = parseinput( LITERALS, x)
+    arg = literal(args[1])
     return quote
         $arg
     end
 end
 
 macro testlits(x...)
-    args = parseinput( ALL_INPUTS, x...) 
-    values = [x.value for x in args]
+    args = parseinput( LITERALS, x...)
+    dump(args)
+    values = [literal(x) for x in args]
     return quote
         $values
     end
@@ -47,7 +31,7 @@ end
 
 
 macro testlitassign(name, x)
-    args = parseinput(ALL_INPUTS, x)
+    args = parseinput(LITERALS, x)
     name = name |> esc                      # name has to be escaped
     argvalue = args[1].value
     return quote
@@ -59,7 +43,7 @@ end
 macro testarg(x)
     args = parseinput([ArgumentAssigment{Int}], x)
     arg = args[1] |> argument |> esc
-    v = args[1] |> value
+    v = args[1] |> argumentvalue
     return quote
         $arg = $v
     end

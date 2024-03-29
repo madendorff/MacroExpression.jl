@@ -6,11 +6,11 @@ using Test
     @testset "Test Types" begin
 
         s1 = SymbolExpr{Function}(:println)
-        @test eval(s1.symbol) == println
+        @test eval(s1 |> func) == println
         s2 = LiteralExpr{Int}(12)
         @test s2.value == 12
 
-        a1 = ArgumentAssigment(:a, :Int, 37)
+        a1 = ArgumentAssigment(:(a::Int=37), :a, :Int, 37)
         @test typeof(a1) == ArgumentAssigment{Int}
 
     end
@@ -33,16 +33,15 @@ using Test
         inputs = @parsemacro "abc"
         @test inputs[1].value == "abc"
 
-        
-        # Each type of symbol is collected separately too
-        inputs = @parsemacro println
-        @test inputs[1].symbol == :println
-        @test inputs[1].type == Function
     
         # Test literal retrieval inside a macro
         # This macro returns a literal
         l2 = MacroExpression.@testlit 13
-        @test l2.value == 13
+        @test l2 == 13
+
+        # This macro returns a literal string
+        l2 = MacroExpression.@testlit "ssas"
+        @test l2 == "ssas"
 
         # collect array of strings
         arr = MacroExpression.@testlits "yw"
@@ -53,11 +52,18 @@ using Test
         @test arr == ["yw", "hj"]
 
         # collect mixed array in body
+        arr = MacroExpression.@testlit begin
+            34
+            "hj"
+        end
+        @test arr == 34   #testlit only returns 1st
+
+        # collect mixed array in body
         arr = MacroExpression.@testlits begin
             34
             "hj"
         end
-        @test arr == [34, "hj"]     
+        @test arr == [34,"hj"]
         
         # collect mixed array
         arr = MacroExpression.@testlits "kx", begin
@@ -83,6 +89,21 @@ using Test
         @test var3 == 22
         @test var4 == 12
 
+    end
+
+    @testset "Functions" begin
+
+        inputs = @parsemacro println
+        #@test inputs[1].symbol == :println
+        #@test inputs[1].type == Function
+
+        inputs = @parsemacro println("abc")
+        #@test inputs[1].func == :println
+        #@test inputs[1].argtype == String
+        
+        inputs = @parsemacro println("abc", "123")
+        #@test inputs[1].func == :println
+        #@test inputs[1].argtypes == (String, String)
     end
 
 end
